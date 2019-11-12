@@ -17,3 +17,9 @@ __pycache__
 # Mac files
 .DS_Store
 
+# Image files in the root
+/*.png
+/*.jpg
+/*.jpeg
+
+

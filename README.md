@@ -3,6 +3,20 @@
 Simple utility to convert UTF-8 text into a PNG image with a black 2 pixel border.
 
 
+## Quickstart
+
+### Finding the size of text
+
+```
+python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -c -t "Hello World"
+```
+
+### Rendering of simple text
+
+```
+python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -r -t "Hello World" -o helloWorld.png -d
+```
+
 
 ## Setup 
 
