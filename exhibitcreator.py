@@ -57,14 +57,16 @@ def parseArguments():
 
 def fontForNameAndSize(fontfile, fontSize):
     if fontfile:
-        font = ImageFont.truetype(fontfile, fontSize)
+        font = ImageFont.truetype(fontfile, fontSize, layout_engine = ImageFont.LAYOUT_RAQM)
     else:
         font = ImageFont.load_default()
 
     return font
-    
+
+
 def calculateTextSizeForFont(text, font):
     return font.getsize(text)
+
 
 def addAllAroundToSize(size, around):
     total = around * 2
@@ -90,6 +92,21 @@ def isImageSizeGreaterThanMaximum(text, renderSettings, maximum):
     return result
 
 
+def drawLinesAroundBorder(draw, topLeftX, topLeftY, bottomRightX, bottomRightY):
+        
+    # Horizontal line at the top
+    draw.line((topLeftX, topLeftY, bottomRightX, topLeftY), width=1, fill='black')
+
+    # Horizontal line at the bottom
+    draw.line((topLeftX, bottomRightY, bottomRightX, bottomRightY), width=1, fill='black')
+
+    # Vertical line at the left
+    draw.line((topLeftX, topLeftY, topLeftX, bottomRightY), width=1, fill='black')
+
+    # Vertical line at the right
+    draw.line((bottomRightX, topLeftY, bottomRightX, bottomRightY), width=1, fill='black')
+
+
 def createImageWithText(text, renderSettings):
     font = fontForNameAndSize(renderSettings.fontfile, renderSettings.fontsize)
     imageSize = calculateTotalImageSizeForText(text, font, renderSettings)
@@ -106,16 +123,17 @@ def createImageWithText(text, renderSettings):
     log.debug('Drawing text starting at: %s', textStart)
     
     draw.text(textStart, text, font=font, fill='black')
-    correction = renderSettings.border / 2
-    startx = correction
-    starty = 0
-    maxx = imageSize[0] - 1 - correction
-    maxy = imageSize[1] - correction
+    maxx = imageSize[0] - 1
+    maxy = imageSize[1] - 1
 
-    draw.line((startx, starty, maxx, starty), width=renderSettings.border, fill='black')
-    draw.line((maxx, starty, maxx, maxy), width=renderSettings.border, fill='black')
-    draw.line((maxx, maxy, startx, maxy), width=renderSettings.border, fill='black')
-    draw.line((startx, maxy, startx, starty), width=renderSettings.border, fill='black')
+    borderRange = range(0,renderSettings.border)
+    for offset in borderRange:
+        topLeftX = offset
+        topLeftY = offset
+        bottomRightX = maxx - offset
+        bottomRightY = maxy - offset
+        drawLinesAroundBorder(draw, topLeftX, topLeftY, bottomRightX, bottomRightY)
+        
     return image
 
 
@@ -177,7 +195,19 @@ if arguments.check:
 
 
 if arguments.render:
-    image = renderImageFromTextAndSettings(arguments.text, renderSettings)
+    if (not arguments.text) and (not arguments.input):
+        print('No input text provided, exiting')
+        exit(-1)
+        
+    textToRender = None    
+
+    if arguments.text:
+        textToRender = arguments.text
+    else:
+        with open(arguments.input, 'r') as file:
+            textToRender = file.read()
+            
+    image = renderImageFromTextAndSettings(textToRender, renderSettings)
     image.save(arguments.output)
 
 

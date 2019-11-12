@@ -17,6 +17,12 @@ python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -c -t "Hel
 python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -r -t "Hello World" -o helloWorld.png -d
 ```
 
+### Rendering with border and padding
+
+```
+python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 20 -r -t "Hello World" -o helloWorld.png -d -p 10 -b 7
+```
+
 
 ## Setup 
 
