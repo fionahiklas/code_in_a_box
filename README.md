@@ -8,7 +8,7 @@ Simple utility to convert UTF-8 text into a PNG image with a black 2 pixel borde
 ### Finding the size of text
 
 ```
-python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -c -t "Hello World"
+python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -c -t "Hello World" -mw 100 -mh 200
 ```
 
 ### Rendering of simple text
@@ -21,6 +21,13 @@ python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -r -t "Hel
 
 ```
 python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 20 -r -t "Hello World" -o helloWorld.png -d -p 10 -b 7
+```
+
+
+### Rendering text from a file
+
+```
+python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 20 -r -o helloWorld.png -d -p 10 -b 2 -i tests/test.txt
 ```
 
 
@@ -44,6 +51,36 @@ pip install -r requirements.txt
 Some are included under the `fonts` directory, see the references section to links.  This are all
 Open Source TrueType fonts.  Any other TrueType fonts can be used.
 
+
+## Notes
+
+### ImageFont.getsize()
+
+The `getsize()` method on the returned font object seems to calculate the width without issue but
+it doesn't take into account the number of lines in the whole block of text when calculating the 
+height.
+
+A defect was apparently [raised for this](https://github.com/python-pillow/Pillow/issues/2966)
+
+The proposed solution is to use `ImageDraw.Draw.textsize()` which does apparently consider the number
+of lines.  The only problem with this approach is that you need to have an image from which to create
+the Draw object.  This seems hacky and, for checking the size at least, there seems little point in 
+creating the image.  
+
+The only work around I could find for this is to treat a block of text as an array of lines, find the
+longest one, get the metrics for that line and then multiply the height up.  This seems to work and 
+gets the job done but it might be nicer if this was available in the font engine.  
+
+### Draw.line() using width
+
+I tried several attempts to calculate the correct coordinates for lines to be drawn around the border
+so that they had uniform thickness all the way round.  It seems that there may be some magic 
+calculation that can be done but I couldn't figure out what it was.  Getting the code working with a
+border with of 7 it then failed on 2.
+
+In the end the solution I came up with was to draw single pixel width lines multiple times at offsets
+from the outside of the image area.  This seemed to work correctly.  Not an entirely elegant solution
+but functional.
 
 
 ## References

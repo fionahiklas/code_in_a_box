@@ -101,9 +101,11 @@ def calculateTotalImageSizeForTextSize(textSize, renderSettings):
 
 def isImageSizeGreaterThanMaximum(text, renderSettings, maximum):
     font = fontForNameAndSize(renderSettings.fontfile, renderSettings.fontsize)
-    textSize = calculateTotalImageSizeForText(text, font, renderSettings)
-    log.debug('Total size: %s, max size: %s', textSize, maximum)
-    result = (textSize[0] > maximum[0] or textSize[1] > maximum[1])
+    lineSize, textSize = calculateTextMetricsForFont(text, font)
+    log.debug('Text size: %s', textSize)
+    totalSize = calculateTotalImageSizeForTextSize(textSize, renderSettings)
+    log.debug('Total size: %s, max size: %s', totalSize, maximum)
+    result = (totalSize[0] > maximum[0] or totalSize[1] > maximum[1])
     log.debug('Is image size greater than maximum: %d', result)
     return result
 
@@ -166,9 +168,13 @@ def createImageWithText(text, renderSettings):
 #
 def checkImageSizeAgainstMaximum(text, renderSettings, maximum):
     imageTooBig = isImageSizeGreaterThanMaximum(text, renderSettings, maximum)
-    log.debug('Image size is too big, exiting with value of 1')
-    sys.exit(1)
-
+    if imageTooBig:
+        log.debug('Image size is too big, exiting with value of 1')
+        sys.exit(1)
+    else:
+        log.debug('Image is less than maximum')
+        sys.exit(0)
+        
 
 ##
 #
@@ -207,6 +213,10 @@ renderSettings = RenderSettings(
 log.debug('Render settings: %s', renderSettings)
 
 if arguments.check:
+    if not (arguments.maxwidth and arguments.maxheight):
+        print('No maximum size provided, exiting')
+        exit(-1)
+
     log.debug('Checking image size')
     maximum = (arguments.maxwidth, arguments.maxheight)
     log.debug('Checking against maximum: %s', maximum)
