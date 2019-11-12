@@ -63,9 +63,26 @@ def fontForNameAndSize(fontfile, fontSize):
 
     return font
 
+def findIndexOfLongestLine(text):
+    longestIndex = 0
+    index = 0
+    size = 0
+    for line in text:
+        length = len(line)
+        if length > size:
+            size = length
+            longestIndex = index
+        index += 1
 
-def calculateTextSizeForFont(text, font):
-    return font.getsize(text)
+    return longestIndex
+
+
+def calculateTextMetricsForFont(text, font):
+    longestLine = findIndexOfLongestLine(text)
+    log.debug('Index of longest line: %s', longestLine)
+    sizeForOneLine = font.getsize(text[longestLine])
+    sizeForAllLines = ( sizeForOneLine[0], sizeForOneLine[1] * len(text))
+    return (sizeForOneLine, sizeForAllLines)
 
 
 def addAllAroundToSize(size, around):
@@ -73,8 +90,7 @@ def addAllAroundToSize(size, around):
     return ( size[0]+total , size[1]+total )
 
 
-def calculateTotalImageSizeForText(text, font, renderSettings):
-    textSize = calculateTextSizeForFont(text, font)
+def calculateTotalImageSizeForTextSize(textSize, renderSettings):
     log.debug('Text size: %s', textSize)
     textSize = addAllAroundToSize(textSize, renderSettings.padding)
     log.debug('Text size after padding: %s', textSize)
@@ -109,8 +125,10 @@ def drawLinesAroundBorder(draw, topLeftX, topLeftY, bottomRightX, bottomRightY):
 
 def createImageWithText(text, renderSettings):
     font = fontForNameAndSize(renderSettings.fontfile, renderSettings.fontsize)
-    imageSize = calculateTotalImageSizeForText(text, font, renderSettings)
+    lineSize, textSize = calculateTextMetricsForFont(text, font)
+    imageSize = calculateTotalImageSizeForTextSize(textSize, renderSettings)
 
+    log.debug('Metrics: textSize: %s, lineSize: %s', textSize, lineSize)
     log.debug('Creating image with size: %s', imageSize)
     image = Image.new('RGB', imageSize, color = 'white')
 
@@ -118,11 +136,12 @@ def createImageWithText(text, renderSettings):
     draw = ImageDraw.Draw(image)
 
     textOffset = renderSettings.padding + renderSettings.border
-    textStart = ( textOffset, textOffset )
+    textRange = range(0, len(text))
     
-    log.debug('Drawing text starting at: %s', textStart)
-    
-    draw.text(textStart, text, font=font, fill='black')
+    for offset in textRange:
+        textLocation = ( textOffset, textOffset + (offset * lineSize[1]) )
+        draw.text(textLocation, text[offset], font=font, fill='black')
+
     maxx = imageSize[0] - 1
     maxy = imageSize[1] - 1
 
@@ -199,13 +218,13 @@ if arguments.render:
         print('No input text provided, exiting')
         exit(-1)
         
-    textToRender = None    
+    textToRender = []   
 
     if arguments.text:
-        textToRender = arguments.text
+        textToRender += arguments.text
     else:
         with open(arguments.input, 'r') as file:
-            textToRender = file.read()
+            textToRender = file.readlines()
             
     image = renderImageFromTextAndSettings(textToRender, renderSettings)
     image.save(arguments.output)
