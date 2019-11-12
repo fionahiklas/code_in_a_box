@@ -100,19 +100,22 @@ def createImageWithText(text, renderSettings):
     log.debug('Creating drawing object')
     draw = ImageDraw.Draw(image)
 
-    textStart = addAllAroundToSize(addAllAroundToSize((0,0), renderSettings.padding),
-                                   renderSettings.border)
+    textOffset = renderSettings.padding + renderSettings.border
+    textStart = ( textOffset, textOffset )
     
     log.debug('Drawing text starting at: %s', textStart)
     
     draw.text(textStart, text, font=font, fill='black')
-    maxx = imageSize[0] - 1
-    maxy = imageSize[1] - 1
+    correction = renderSettings.border / 2
+    startx = correction
+    starty = 0
+    maxx = imageSize[0] - 1 - correction
+    maxy = imageSize[1] - correction
 
-    draw.line((0, 0, maxx, 0), width=renderSettings.border, fill='black')
-    draw.line((maxx, 0, maxx, maxy), width=renderSettings.border, fill='black')
-    draw.line((maxx, maxy, 0, maxy), width=renderSettings.border, fill='black')
-    draw.line((0, maxy, 0, 0), width=renderSettings.border, fill='black')
+    draw.line((startx, starty, maxx, starty), width=renderSettings.border, fill='black')
+    draw.line((maxx, starty, maxx, maxy), width=renderSettings.border, fill='black')
+    draw.line((maxx, maxy, startx, maxy), width=renderSettings.border, fill='black')
+    draw.line((startx, maxy, startx, starty), width=renderSettings.border, fill='black')
     return image
 
 
