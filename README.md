@@ -20,18 +20,59 @@ python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -r -t "Hel
 ### Rendering with border and padding
 
 ```
-python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 20 -r -t "Hello World" -o helloWorld.png -d -p 10 -b 7
+python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -r -t "Hello World" -o helloWorld.png -d -p 10 -b 7
 ```
 
 
 ### Rendering text from a file
 
 ```
-python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 20 -r -o helloWorld.png -d -p 10 -b 2 -i tests/test.txt
+python exhibitcreator.py -f fonts/FiraMono/FiraMono-Regular.ttf -s 12 -r -o helloWorld.png -d -p 3 -b 2 -i tests/test.txt
 ```
 
 
-## Setup 
+## Parameters
+
+See the output from `exhibitcreator.py -h` for up-to-date command usage information
+
+```
+usage: exhibitcreator.py [-h] [-i INPUT] [-o OUTPUT] [-c] [-r] [-f FONTFILE]
+                         [-s FONTSIZE] [-t TEXT] [-b BORDER] [-p PADDING]
+                         [-x WIDTH] [-y HEIGHT] [-mw MAXWIDTH] [-mh MAXHEIGHT]
+                         [-d]
+
+Exhibit creator - convert text to image
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Input text file
+  -o OUTPUT, --output OUTPUT
+                        Output image file
+  -c, --check           Check font size
+  -r, --render          Render text into image
+  -f FONTFILE, --fontfile FONTFILE
+                        Font to use for rendering
+  -s FONTSIZE, --fontsize FONTSIZE
+                        Font size to use for rendering
+  -t TEXT, --text TEXT  Font to use for rendering
+  -b BORDER, --border BORDER
+                        Border width
+  -p PADDING, --padding PADDING
+                        Padding around text
+  -x WIDTH, --width WIDTH
+                        Width to use for image
+  -y HEIGHT, --height HEIGHT
+                        Height to use for image
+  -mw MAXWIDTH, --maxwidth MAXWIDTH
+                        Max width to use for checking image
+  -mh MAXHEIGHT, --maxheight MAXHEIGHT
+                        Max height to use for checking image
+  -d, --debug           Turn on debugging
+```
+
+
+## Development 
 
 ### Create Virtual Environment
 
@@ -65,11 +106,12 @@ A defect was apparently [raised for this](https://github.com/python-pillow/Pillo
 The proposed solution is to use `ImageDraw.Draw.textsize()` which does apparently consider the number
 of lines.  The only problem with this approach is that you need to have an image from which to create
 the Draw object.  This seems hacky and, for checking the size at least, there seems little point in 
-creating the image.  
+creating the image.
 
 The only work around I could find for this is to treat a block of text as an array of lines, find the
 longest one, get the metrics for that line and then multiply the height up.  This seems to work and 
-gets the job done but it might be nicer if this was available in the font engine.  
+gets the job done but it might be nicer if this was available in the font engine.
+
 
 ### Draw.line() using width
 
